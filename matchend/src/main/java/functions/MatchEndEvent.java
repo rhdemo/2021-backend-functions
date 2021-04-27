@@ -13,17 +13,11 @@ import io.vertx.core.json.JsonObject;
 
 import java.time.LocalDateTime;
 import javax.inject.Inject;
-import java.net.*;
-import java.util.*;
 
 import org.uth.summit.utils.*;
 
 public class MatchEndEvent 
 {
-    private static final int DEFAULT_DESTROYED_SCORE = 100;
-    private static final int DEFAULT_HIT_SCORE = 5;
-    private long start = System.currentTimeMillis();
-
     @Inject
     Vertx vertx;
 
@@ -85,26 +79,9 @@ public class MatchEndEvent
         System.out.println( "  Match: " + match );
         System.out.println( "    WINNER: " + winnerUsername + " " + ( winnerHuman ? "(HUME)" : "(BOTTY)" ) );
         System.out.println( "    LOSER: " + loserUsername + " " + ( loserHuman ? "(HUME)" : "(BOTTY)") );
+
+        Postman postman = null;
         
-        // Build WIN/LOSS rest URL here as we have all info
-        // Format /scoring/(game)/(match)/(uuid)/win?timestamp
-        // Format /scoring/(game)/(match)/(uuid)/loss?timestamp
-        String compositeWinURL = _scoringServiceURL + "scoring/" + game + "/" + match + "/" + winnerUuid + "/win?" + System.currentTimeMillis();
-        String compositeLoseURL = _scoringServiceURL + "scoring/" + game + "/" + match + "/" + loserUuid + "/loss?" + System.currentTimeMillis();
-
-        // Update the WIN/LOSS cache
-        Postman postman = new Postman( compositeWinURL );
-        if( !( postman.deliver("dummy")))
-        {
-          System.out.println( "Failed to update WIN cache");
-        }
-
-        postman = new Postman( compositeLoseURL );
-        if( !( postman.deliver("dummy")))
-        {
-          System.out.println( "Failed to update LOSE cache");
-        }
-
         // Award the winner a set amount of points for being the victor
         String envValue = System.getenv("WIN_SCORE");
 
@@ -116,10 +93,30 @@ public class MatchEndEvent
         if( !( postman.deliver("dummy")))
         {
           System.out.println( "Failed to add winner score for " + winnerUsername );
+          System.out.println( " Failed URL - " + compositeScoreURL );
         }
         else
         {
           System.out.println( "Rewarded " + winnerUsername + " " + winDelta + " for the win...");
+        }
+
+        // Build WIN/LOSS rest URL here as we have all info
+        // Format /scoring/(game)/(match)/(uuid)/win?timestamp
+        // Format /scoring/(game)/(match)/(uuid)/loss?timestamp
+        String compositeWinURL = _scoringServiceURL + "scoring/" + game + "/" + match + "/" + winnerUuid + "/win?" + System.currentTimeMillis();
+        String compositeLoseURL = _scoringServiceURL + "scoring/" + game + "/" + match + "/" + loserUuid + "/loss?" + System.currentTimeMillis();
+
+        // Update the WIN/LOSS cache
+        postman = new Postman( compositeWinURL );
+        if( !( postman.deliver("dummy")))
+        {
+          System.out.println( "Failed to update WIN cache");
+        }
+
+        postman = new Postman( compositeLoseURL );
+        if( !( postman.deliver("dummy")))
+        {
+          System.out.println( "Failed to update LOSE cache");
         }
 
         output.setGame(game);
