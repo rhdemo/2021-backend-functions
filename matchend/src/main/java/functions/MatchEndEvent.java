@@ -105,6 +105,19 @@ public class MatchEndEvent
           System.out.println( "Failed to update LOSE cache");
         }
 
+        // Award the winner a set amount of points for being the victor
+        String envValue = System.getenv("WIN_SCORE");
+
+        int winDelta = ( envValue == null ? 200 : Integer.parseInt(envValue));
+
+        String compositeScoreURL = _scoringServiceURL + "scoring/" + game + "/" + match + "/" + winnerUuid + "?delta=" + winDelta + "&human=" + winnerHuman + "&username=" + winnerUsername + "&timestamp=" + System.currentTimeMillis();
+
+        postman = new Postman( compositeScoreURL);
+        if( !( postman.deliver("dummy")))
+        {
+          System.out.println( "Failed to add winner score for " + winnerUsername );
+        }
+
         output.setGame(game);
         output.setMatch(match);
         output.setWinnerUsername( winnerUsername );
