@@ -87,7 +87,7 @@ public class MatchEndEvent
 
         int winDelta = ( envValue == null ? 200 : Integer.parseInt(envValue));
 
-        String compositeScoreURL = _scoringServiceURL + "scoring/" + game + "/" + match + "/" + winnerUuid + "?delta=" + winDelta + "&human=" + winnerHuman + "&username=" + winnerUsername + "&timestamp=" + System.currentTimeMillis();
+        String compositeScoreURL = _scoringServiceURL + "scoring/" + game + "/" + match + "/" + winnerUuid + "?delta=" + winDelta + "&human=" + winnerHuman + "&username=" + winnerUsername.replaceAll(" ", "%20") + "&timestamp=" + System.currentTimeMillis();
 
         postman = new Postman( compositeScoreURL);
         if( !( postman.deliver("dummy")))
