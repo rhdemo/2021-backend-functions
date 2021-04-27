@@ -117,6 +117,10 @@ public class MatchEndEvent
         {
           System.out.println( "Failed to add winner score for " + winnerUsername );
         }
+        else
+        {
+          System.out.println( "Rewarded " + winnerUsername + " " + winDelta + " for the win...");
+        }
 
         output.setGame(game);
         output.setMatch(match);
